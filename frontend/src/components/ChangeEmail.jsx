@@ -1,60 +1,81 @@
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-const changeEmail = () => {
+import { useState } from "react";
+import { useSettingStore } from "../store/useSetting";
+
+
+const ChangeEmail = () => {
   const navigate = useNavigate();
-  const ChangeEmail = () => {
-    setTimeout()
+  const { changeEmail, emailChangeloading } = useSettingStore();
+
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      await changeEmail(formData);
+    } catch (error) {
+      console.log(error.message);
+    }
   };
 
   return (
-
-    <div className="w-full h-[calc(100vh-5rem)]  bg-base-200 flex justify-center items-center p-4">
-      <div className="w-full h-full  max-w-2xl bg-base-100 rounded-3xl shadow-xl border border-base-300 p-6 flex flex-col gap-4">
-        <div className="mb-8 flex justify-between ">
+    <div className="w-full h-[calc(100vh-5rem)] bg-base-200 flex justify-center items-center p-4">
+      <div className="w-full h-full max-w-2xl bg-base-100 rounded-3xl shadow-xl border border-base-300 p-6 flex flex-col gap-4">
+        {/* Header */}
+        <div className="mb-8 flex justify-between">
           <div>
-            <h1 className="text-3xl font-bold">{`Settings > Change Email `}</h1>
-            <p className="text-sm opacity-70 mt-1">
-            Change your email
-          </p>
+            <h1 className="text-3xl font-bold">Settings &gt; Change Email</h1>
+            <p className="text-sm opacity-70 mt-1">Change your email address</p>
           </div>
-          <div>
-            <button
-              onClick={() => navigate(-1)}
-              className="btn btn-ghost gap-2"
-            >
-              <ArrowLeft size={20} />
-              Back
-            </button>
+
+          <button onClick={() => navigate(-1)} className="btn btn-ghost gap-2">
+            <ArrowLeft size={20} />
+            Back
+          </button>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div className="border border-base-300 rounded-xl px-4 py-3">
+            <input
+              type="email"
+              value={formData.email}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
+              className="w-full bg-transparent outline-none text-xl"
+              placeholder="Enter new email"
+            />
           </div>
-          
 
-          
-        </div>
-        <div className="border border-base-300 rounded-xl px-4 py-3">
-          <input
-            type="text"
-            className="w-full bg-transparent outline-none text-xl"
-            placeholder="Enter old Email"
-          />
-        </div>
+          <div className="border border-base-300 rounded-xl px-4 py-3">
+            <input
+              type="password"
+              value={formData.password}
+              onChange={(e) =>
+                setFormData({ ...formData, password: e.target.value })
+              }
+              className="w-full bg-transparent outline-none text-xl"
+              placeholder="Enter password"
+            />
+          </div>
 
-        <div className="border border-base-300 rounded-xl px-4 py-3">
-          <input
-            type="text"
-            className="w-full bg-transparent outline-none text-xl"
-            placeholder="Enter new Email"
-          />
-        </div>
-
-        <button
-          className="btn btn-md w-full hover:bg-primary/30 text-xl"
-          onClick={ChangeEmail}
-        >
-          Change Email
-        </button>
+          <button
+            type="submit"
+            className="btn btn-md w-full hover:bg-primary/30 text-xl"
+            disabled={emailChangeloading}
+          >
+            {emailChangeloading ? "Updating..." : "Change Email"}
+          </button>
+        </form>
       </div>
     </div>
   );
 };
 
-export default changeEmail;
+export default ChangeEmail;

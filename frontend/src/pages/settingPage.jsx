@@ -25,8 +25,8 @@ const Setting = () => {
   const ChangeEmail = () => navigate("/settings/change-email");
 
   const ChangePassword = () => navigate("/settings/change-password");
-  const privacySetting = () => navigate("/settings/privacy");
-  const DeleteAccount = () => {};
+  // const privacySetting = () => navigate("/settings/privacy");
+  const DeleteAccount = () => navigate("/settings/delete-account");
 
   return (
     <div className="w-full  mt-16 bg-base-200 flex justify-center p-4 ">
@@ -91,7 +91,7 @@ const Setting = () => {
             <div className="space-y-4">
               {/* Privacy */}
 
-              <div
+              {/* <div
                 onClick={privacySetting}
                 className="bg-base-200 hover:bg-base-300 transition-all cursor-pointer rounded-2xl p-4 flex items-center justify-between"
               >
@@ -106,7 +106,7 @@ const Setting = () => {
                 </div>
 
                 <ChevronRight className="size-5 opacity-60" />
-              </div>
+              </div> */}
 
               {/* PASSWORD */}
               <div

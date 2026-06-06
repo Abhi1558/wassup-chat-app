@@ -6,7 +6,7 @@ import { Loader2 } from "lucide-react";
 import useAuthStore from "../store/useAuthStore";
 import { useRef } from "react";
 
-const VerifySignupPage = () => {
+const VerifyEmailPage = () => {
   const hasVerified = useRef(false);
   const { token } = useParams();
   const navigate = useNavigate();
@@ -23,14 +23,14 @@ const VerifySignupPage = () => {
   const verifyEmail = async () => {
     try {
       const res = await axiosInstance.get(
-        `/verification/signUp-verification/${token}`
+        `/verification/email-verification/${token}`
       );
 
       toast.success(res.data.message);
 
       await checkAuth();
 
-      navigate("/");
+      navigate("/Login");
     } catch (err) {
       const message =
         err.response?.data?.message || "Verification failed";
@@ -85,4 +85,4 @@ const VerifySignupPage = () => {
   );
 };
 
-export default VerifySignupPage;
+export default VerifyEmailPage;

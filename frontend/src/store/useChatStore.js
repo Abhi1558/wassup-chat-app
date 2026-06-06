@@ -55,9 +55,9 @@ export const useChatStore = create((set, get) => ({
       set((state) => ({
         messages: [...state.messages, res.data.data],
       }));
-      console.log(res.data);
+      
 
-      toast.success(res.data.message);
+   
     } catch (error) {
       console.log(error.response.data.message);
       toast.error("Message not sent");
@@ -90,38 +90,28 @@ export const useChatStore = create((set, get) => ({
       messages: [...state.messages, message],
     })),
   updateConversation: (data) =>
-    set((state) => {
-      const updated = state.conversations.map((chat) => {
-        // receiver side
-        if (chat.user._id === data.senderId) {
-          return {
-            ...chat,
-            lastMessage: data.lastMessage,
-            lastMessageTime: data.lastMessageTime,
-            unreadCount: data.unreadCount,
-          };
-        }
+  set((state) => {
+    const updated = state.conversations.map((chat) => {
+      if (chat.conversationId === data.conversationId) {
+        return {
+          ...chat,
+          lastMessage: data.lastMessage,
+          lastMessageTime: data.lastMessageTime,
+          unreadCount:
+            data.unreadCount !== undefined
+              ? data.unreadCount
+              : chat.unreadCount,
+        };
+      }
+      return chat;
+    });
 
-        // sender side
-        if (chat.user._id === data.receiverId) {
-          return {
-            ...chat,
-            lastMessage: data.lastMessage,
-            lastMessageTime: data.lastMessageTime,
-            unreadCount: 0,
-          };
-        }
+    updated.sort(
+      (a, b) => new Date(b.lastMessageTime) - new Date(a.lastMessageTime)
+    );
 
-        return chat;
-      });
-
-      // move latest chat to top
-      updated.sort(
-        (a, b) => new Date(b.lastMessageTime) - new Date(a.lastMessageTime),
-      );
-
-      return { conversations: updated };
-    }),
+    return { conversations: updated };
+  }),
   updateMessageStatus: (messageId, status) =>
     set((state) => ({
       messages: state.messages.map((msg) =>
@@ -129,9 +119,11 @@ export const useChatStore = create((set, get) => ({
       ),
     })),
   markMessagesSeen: (senderId) =>
-    set((state) => ({
-      messages: state.messages.map((msg) =>
-        msg.senderId === senderId ? { ...msg, status: "seen" } : msg,
-      ),
-    })),
+  set((state) => ({
+    messages: state.messages.map((msg) =>
+      String(msg.senderId) === String(senderId)
+        ? { ...msg, status: "seen" }
+        : msg
+    ),
+  })),
 }));

@@ -1,5 +1,6 @@
 import { Server } from "socket.io";
 import Message from "./models/message.model.js";
+import User from "./models/user.model.js";
 
 let io;
 
@@ -33,19 +34,33 @@ export const initSocket = (server) => {
     });
 
     // DISCONNECT
-    socket.on("disconnect", () => {
+    socket.on("disconnect", async () => {
       console.log("❌ Disconnected:", socket.id);
 
       if (socket.userId) {
+        // remove from online users
         userSockets.delete(socket.userId);
 
+        // update last seen
+        await User.findByIdAndUpdate(socket.userId, {
+          lastSeen: new Date(),
+        });
+
+        // send updated online users
         io.emit("getOnlineUsers", Array.from(userSockets.keys()));
       }
     });
     socket.on("markSeen", async ({ senderId, receiverId }) => {
       console.log("👁️ markSeen", senderId, receiverId);
 
-      // update messages in DB
+      // get unseen messages first
+      const unseenMessages = await Message.find({
+        senderId,
+        receiverId,
+        status: { $ne: "seen" },
+      });
+
+      // update DB
       await Message.updateMany(
         {
           senderId,
@@ -54,16 +69,19 @@ export const initSocket = (server) => {
         },
         {
           $set: { status: "seen" },
-        },
+        }
       );
+      
 
       // sender socket
       const senderSocketId = getReceiverSocketId(senderId.toString());
 
-      // notify sender
+      // notify sender message-by-message
       if (senderSocketId) {
-        io.to(senderSocketId).emit("messagesSeen", {
-          senderId,
+        unseenMessages.forEach((msg) => {
+          io.to(senderSocketId).emit("messageSeen", {
+            messageId: msg._id,
+          });
         });
       }
     });

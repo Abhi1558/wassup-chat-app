@@ -1,12 +1,44 @@
-import express from "express"
-import {signUp, logIn, logOut, forgotPassword} from "../controllers/auth.controller.js"
-import {protectedRoute} from "../middlewares/user.middleware.js"
-const router=express.Router();//create a small app 
+import express from "express";
 
-router.post("/signup",signUp)
-router.post("/login",logIn)
-router.post("/logout",protectedRoute, logOut)
-router.put("/forgot-password", protectedRoute, forgotPassword)
+import {
+  signUp,
+  logIn,
+  logOut,
+  forgotPassword,
+} from "../controllers/auth.controller.js";
 
+import { protectedRoute }from "../middlewares/user.middleware.js";
+
+import {
+  loginLimiter,
+  signupLimiter,
+  forgotPasswordLimiter,
+} from "../middlewares/rateLimiter.js";
+
+const router = express.Router();
+
+router.post(
+  "/signup",
+  signupLimiter,
+  signUp
+);
+
+router.post(
+  "/login",
+  loginLimiter,
+  logIn
+);
+
+router.post(
+  "/logout",
+  protectedRoute,
+  logOut
+);
+
+router.post(
+  "/forgot-password",
+  forgotPasswordLimiter,
+  forgotPassword
+);
 
 export default router;

@@ -3,10 +3,14 @@ import mongoose from "mongoose";
 const userschema = new mongoose.Schema(
   {
     email: {
-      unique: true,
       type: String,
       required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+      match: [/^\S+@\S+\.\S+$/, "Invalid email"],
     },
+
     fullName: {
       type: String,
       required: true,

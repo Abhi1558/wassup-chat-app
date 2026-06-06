@@ -22,28 +22,39 @@ const SocketManager = () => {
     socket.emit("addUser", authUser._id);
 
     socket.on("connect", () => {
-      console.log("✅ Socket connected");
+      
     });
 
     // online users
     socket.on("getOnlineUsers", (users) => {
-      console.log("ONLINE USERS:", users);
+      
 
       setOnlineUsers(users);
     });
 
     // new real-time message
     socket.on("newMessage", (message) => {
-      console.log("📩 NEW MESSAGE:", message);
+      
 
       const selectedUser = useChatStore.getState().SelectedUser;
+      const authUser = useAuthStore.getState().authUser;
 
-      if (selectedUser?._id !== String(message.senderId)) return;
+      // current chat is not open
+      if (String(selectedUser?._id) !== String(message.senderId)) {
+        return;
+      }
 
+      // show message
       addMessage(message);
+
+      // instantly mark as seen
+      socket.emit("markSeen", {
+        senderId: message.senderId,
+        receiverId: authUser._id,
+      });
     });
     socket.on("conversationUpdated", (data) => {
-      console.log("📌 SIDEBAR UPDATE:", data);
+      
 
       updateConversation(data);
     });
@@ -51,16 +62,18 @@ const SocketManager = () => {
       useChatStore.getState().updateMessageStatus(messageId, "delivered");
     });
 
-    socket.on("messagesSeen", ({ senderId }) => {
-      useChatStore.getState().markMessagesSeen(senderId);
-    });
+    socket.on("messageSeen", ({ messageId }) => {
+     
 
+      useChatStore.getState().updateMessageStatus(messageId, "seen");
+    });
     return () => {
       socket.off("connect");
       socket.off("getOnlineUsers");
       socket.off("newMessage");
       socket.off("conversationUpdated");
-      socket.off("messagesSeen");;
+      socket.off("messageSeen");
+      socket.off("messageDelivered");
 
       socket.disconnect();
     };

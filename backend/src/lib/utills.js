@@ -4,7 +4,7 @@ import streamifier from "streamifier";
 import cloudinary from "./cloudinary.js";
 
 
-export const generatetoken = (userId, res) => {
+export const generateToken = (userId, res) => {
   try {
     if (!process.env.JWT_SECRET) {
       throw new Error("JWT_SECRET is not defined");

@@ -2,68 +2,81 @@ import Temp from "../models/temp.model.js";
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import cloudinary from "../lib/cloudinary.js";
+import crypto from "crypto";
+import { sendEmail } from "../lib/utills.js";
+import Conversation from "../models/conversation.model.js";
+import Message from "../models/message.model.js";
 
-export const blockUser = async (req, res) => {
+export const toggleBlockUser = async (req, res) => {
   try {
-    const userId = req.user._id;
-    const blockedUserId = req.params.id;
-    if (userId.toString() === blockedUserId.toString()) {
-      return res.status(400).json({ message: "You cannot block yourself." });
+    const currentUserId = req.user._id;
+    const { id: targetUserId } = req.params;
+    const targetUser = await User.findById(targetUserId);
+
+    if (!targetUser) {
+      return res.status(404).json({
+        message: "Target user not found",
+      });
     }
 
-    const findBlockUser = await User.findById(blockedUserId);
-    if (!findBlockUser) {
-      return res.status(400).json({ message: "User not found" });
+    if (currentUserId.toString() === targetUserId) {
+      return res.status(400).json({
+        message: "You cannot block yourself",
+      });
     }
-    await User.findByIdAndUpdate(
-      userId,
-      {
-        $addToSet: {
-          blockedUser: blockedUserId,
-        },
-      },
-      { new: true },
+
+    const user = await User.findById(currentUserId);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    const alreadyBlocked = user.blockedUser.some(
+      (id) => id.toString() === targetUserId
     );
-    res.status(200).json({
+
+    if (alreadyBlocked) {
+      await User.findByIdAndUpdate(currentUserId, {
+        $pull: {
+          blockedUser: targetUserId,
+        },
+      });
+
+      return res.status(200).json({
+        blocked: false,
+        message: "User unblocked successfully",
+      });
+    }
+
+    await User.findByIdAndUpdate(currentUserId, {
+      $addToSet: {
+        blockedUser: targetUserId,
+      },
+    });
+
+    return res.status(200).json({
+      blocked: true,
       message: "User blocked successfully",
     });
   } catch (error) {
-    console.log("Error in blockUser:", error.message);
-    res.status(500).json({ message: "Internal server error" });
+    console.log("toggleBlockUser error:", error);
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
   }
 };
 
-export const unblockUser = async (req, res) => {
-  try {
-    const userId = req.user._id;
-    const blockedUserId = req.params.id;
-
-    if (userId.toString() === blockedUserId) {
-      return res.status(400).json({ message: "Invalid request" });
-    }
-
-    await User.findByIdAndUpdate(
-      userId,
-      {
-        $pull: { blockedUser: blockedUserId },
-      },
-      { new: true },
-    );
-
-    res.status(200).json({ message: "User unblocked successfully" });
-  } catch (error) {
-    console.error("Error in unblockUser:", error.message);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
-
-
-export const updateEmail = async (req, res) => {
+export const changeEmail = async (req, res) => {
   try {
     const userId = req.user._id;
     const { email, password } = req.body;
+
     const cleanEmail = email?.trim().toLowerCase();
 
+    // 1. Validate input
     if (!cleanEmail || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
@@ -73,29 +86,41 @@ export const updateEmail = async (req, res) => {
       return res.status(400).json({ message: "Invalid email format" });
     }
 
-    const user = await User.findById(userId);
-    const oldEmail = user.email;
+    // 2. Get user first (IMPORTANT FIX)
+    const user = await User.findById(userId).select("+password");
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
+    const oldEmail = user.email;
+
+    // 3. Check if same email
     if (oldEmail === cleanEmail) {
-      return res
-        .status(400)
-        .json({ message: "New email must be different from current email" });
+      return res.status(400).json({
+        message: "New email must be different from current email",
+      });
     }
 
+    // 4. Verify password
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
     if (!isPasswordCorrect) {
       return res.status(400).json({ message: "Incorrect password" });
     }
 
-    const existing = await User.findOne({ email: cleanEmail });
+    // 5. Check if email already exists
+    const existing = await User.findOne({
+      email: cleanEmail,
+      _id: { $ne: userId },
+    });
     if (existing) {
       return res.status(400).json({ message: "Email is already in use" });
     }
+
+    // 6. Generate verification token
     const token = crypto.randomBytes(32).toString("hex");
+
+    // 7. Store temp verification request
     await Temp.findOneAndUpdate(
       { email: oldEmail, purpose: "email-verification" },
       {
@@ -105,25 +130,31 @@ export const updateEmail = async (req, res) => {
           expiresAt: new Date(Date.now() + 5 * 60 * 1000),
         },
       },
-      { upsert: true, new: true },
+      { upsert: true, new: true }
     );
 
-    const verifylink = `${process.env.CLIENT_URL}/api/verification/password-verification/${token}`;
+    // 8. Create verification link
+    const verificationLink = `${process.env.CLIENT_URL}/verification/email-verification/${token}`;
+
+    // 9. Send email
     await sendEmail(
-      email,
-      "Reset password link",
+      cleanEmail,
+      "Email Change Verification",
       `
-            <p>this is your link for changing password.it will be expired in 5 minutes.</p>
-            <p>If button doesn't work, use this link:</p>
-            <p>${verifylink}</p>
-          `,
+        <p>You requested to change your email.</p>
+        <p>This link will expire in 5 minutes.</p>
+        <p>If the button doesn't work, use this link:</p>
+        <p>${verificationLink}</p>
+      `
     );
-    return res
-      .status(200)
-      .json({ message: "password reset link sent to email" });
+
+    // 10. Response
+    return res.status(200).json({
+      message: "Email verification link sent successfully",
+    });
   } catch (error) {
-    console.log("error in updateemail controller:", error.message);
-    res.status(500).json({ message: "Internal server error" });
+    console.log("error in updateEmail controller:", error.message);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -131,17 +162,31 @@ export const changePassword = async (req, res) => {
   const { oldPassword, newPassword, confirmPassword } = req.body;
   const userid = req.user._id;
   try {
-    const user = await User.findById(userid);
-
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      return res.status(400).json({
+        message: "All fields are required",
+      });
+    }
+    if (oldPassword === newPassword) {
+      return res.status(400).json({
+        message: "New password must be different",
+      });
+    }
+    const user = await User.findById(userid).select("+password");
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
     const isPasswordCorrect = await bcrypt.compare(oldPassword, user.password);
     if (!isPasswordCorrect) {
       return res.status(400).json({ message: "Incorrect password" });
     }
 
-    if (newPassword.length < 6) {
+    if (newPassword.length < 8) {
       return res
         .status(400)
-        .json({ message: "New password must be atleast 6 characters long" });
+        .json({ message: "New password must be atleast 8 characters long" });
     }
 
     if (newPassword !== confirmPassword) {
@@ -162,44 +207,6 @@ export const changePassword = async (req, res) => {
   }
 };
 
-export const resetPassword = async (req, res) => {
-  const userid = req.user._id;
-
-  try {
-    const user = await User.findById(userid);
-    const email = user.email;
-
-    const token = crypto.randomBytes(32).toString("hex");
-
-    await Temp.findOneAndUpdate(
-      { email: email, purpose: "reset-password" },
-      {
-        $set: {
-          token,
-          expiresAt: new Date(Date.now() + 5 * 60 * 1000),
-        },
-      },
-      { upsert: true, new: true },
-    );
-    const verifylink = `${process.env.CLIENT_URL}/api/verification/password-verification/${token}`;
-    await sendEmail(
-      email,
-      "Reset password link",
-      `
-            <p>this is your link for changing password.it will be expired in 5 minutes.</p>
-            <p>If button doesn't work, use this link:</p>
-            <p>${verifylink}</p>
-          `,
-    );
-    return res
-      .status(200)
-      .json({ message: "password reset link sent to email" });
-  } catch (error) {
-    console.log("error in reset password controller:", error.message);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
-
 export const updateProfile = async (req, res) => {
   const userId = req.user._id;
   const { fullName, description } = req.body;
@@ -215,7 +222,14 @@ export const updateProfile = async (req, res) => {
     if (description !== undefined && description.trim().length === 0) {
       return res.status(400).json({ message: "Description can't be empty" });
     }
-    if (description !== undefined) updateData.description = description;
+    if (description !== undefined) {
+      updateData.description = description.trim();
+    }
+    if (req.file && !req.file.mimetype.startsWith("image/")) {
+      return res.status(400).json({
+        message: "Only image files allowed",
+      });
+    }
     if (req.file) {
       let uploadImage;
       try {
@@ -225,7 +239,7 @@ export const updateProfile = async (req, res) => {
             (error, result) => {
               if (error) return reject(error);
               resolve(result);
-            },
+            }
           );
 
           stream.end(req.file.buffer);
@@ -247,9 +261,9 @@ export const updateProfile = async (req, res) => {
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { $set: updateData },
-      { new: true },
-    );
-    console.log(`Profile updated for user: ${userId}`);
+      { new: true }
+    ).select("-password");
+
     return res.status(200).json({
       message: "updated successfully",
       user: updatedUser,
@@ -259,30 +273,69 @@ export const updateProfile = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 export const deleteAccount = async (req, res) => {
   try {
-    const userId = req.user._id;
     const { password } = req.body;
 
-    const user = await User.findById(userId);
-
-    const isPasswordCorrect = await bcrypt.compare(password, user.password);
-
-    if (!isPasswordCorrect) {
-      return res.status(400).json({ message: "Incorrect password" });
+    if (!password) {
+      return res.status(400).json({
+        message: "Password is required",
+      });
     }
 
-    await User.findOneAndDelete(userId);
+    const user = await User.findById(req.user._id).select("+password");
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(400).json({
+        message: "Incorrect password",
+      });
+    }
+
+    const conversations = await Conversation.find({
+      participants: user._id,
+    }).select("_id");
+
+    const conversationIds = conversations.map((c) => c._id);
+
+    await Message.deleteMany({
+      conversationId: { $in: conversationIds },
+    });
+
+    await Conversation.deleteMany({
+      participants: user._id,
+    });
+
+    await User.findByIdAndDelete(user._id);
+    await User.updateMany(
+      {},
+      {
+        $pull: {
+          blockedUser: user._id,
+        },
+      }
+    );
 
     res.clearCookie("jwt");
-
-    res.status(200).json({ message: "Account deleted successfully" });
+    return res.status(200).json({
+      message: "Account deleted successfully",
+    });
   } catch (error) {
-    console.log(`error in deleteAccount controller : ${error}`);
-    res.status(500).json({ message: "Internal server error " });
+    console.log("deleteAccount error:", error);
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
   }
 };
-
 export const check = async (req, res) => {
   try {
     res.status(200).json(req.user);

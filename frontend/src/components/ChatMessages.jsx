@@ -52,7 +52,7 @@ const ChatMessages = () => {
       senderId: SelectedUser._id,
       receiverId: authUser._id,
     });
-  }, [SelectedUser?._id, authUser?._id]);
+  }, [SelectedUser?._id, authUser?._id],messages);
   // Group messages by date
   const groupedMessages = messages.reduce((groups, message) => {
     const date = new Date(message.createdAt).toLocaleDateString([], {

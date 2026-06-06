@@ -4,12 +4,13 @@ import cloudinary from "../lib/cloudinary.js";
 import User from "../models/user.model.js";
 import { io, getReceiverSocketId } from "../socket.js";
 import { streamUpload } from "../lib/utills.js";
+import { STATUS_CODES } from "../lib/constants.js";
 
 export const searchUsers = async (req, res) => {
   try {
     const { query } = req.query;
     const userId = req.user._id;
-
+    // Search users excluding current user
     if (!query || !query.trim()) {
       return res.json([]);
     }
@@ -27,22 +28,22 @@ export const searchUsers = async (req, res) => {
 
     res.json(users);
   } catch (error) {
-    res.status(500).json({ message: "Error searching users" });
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ message: "Error searching users" });
   }
 };
 export const getChats = async (req, res) => {
   try {
     const userId = req.user._id;
-
+     // Fetch user's conversations
     const conversations = await Conversation.find({
       participants: userId,
     })
       .sort({ lastMessageTime: -1 })
       .populate("participants", "fullName profilePic lastSeen _id");
-
+     // Format conversation data for sidebar
     const chats = conversations.map((conv) => {
       const otherUser = conv.participants.find(
-        (p) => p._id.toString() !== userId.toString(),
+        (p) => p._id.toString() !== userId.toString()
       );
 
       return {
@@ -54,28 +55,28 @@ export const getChats = async (req, res) => {
       };
     });
 
-    res.status(200).json(chats);
+    res.status(STATUS_CODES.OK).json(chats);
   } catch (error) {
     console.log("getChats error:", error.message);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ message: "Internal server error" });
   }
 };
 export const getMessages = async (req, res) => {
   try {
     const { id: userToChatId } = req.params;
     const userId = req.user._id;
-
+    // Find conversation between users
     const conversation = await Conversation.findOne({
       participants: { $all: [userId, userToChatId] },
     });
 
     if (!conversation) {
-      return res.status(200).json([]);
+      return res.status(STATUS_CODES.OK).json([]);
     }
 
     const limit = 20;
     const page = Number(req.query.page) || 1;
-
+    // Load paginated messages
     const messages = await Message.find({
       conversationId: conversation._id,
     })
@@ -83,10 +84,10 @@ export const getMessages = async (req, res) => {
       .skip((page - 1) * limit)
       .limit(limit);
 
-    res.status(200).json(messages.reverse()); // send oldest → newest
+    res.status(STATUS_CODES.OK).json(messages.reverse()); // send oldest → newest
   } catch (error) {
     console.log("getMessages error:", error.message);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ message: "Internal server error" });
   }
 };
 
@@ -95,20 +96,42 @@ export const sendMessages = async (req, res) => {
     const text = req.body.text;
     const file = req.file;
     const senderId = req.user._id;
+    const sender = req.user;
+
+    
 
     const { id: receiverId } = req.params;
+
+    const senderBlockedReceiver = sender.blockedUser.some(
+      (id) => id.toString() === receiverId.toString()
+    );
+     // Validate sender and receiver permissions
+    if (senderBlockedReceiver) {
+      return res.status(STATUS_CODES.FORBIDDEN).json({
+        message: "You have blocked this user",
+      });
+    }
     if (senderId.toString() === receiverId.toString()) {
-      return res.status(400).json({ message: "Cannot message yourself" });
+      return res.status(STATUS_CODES.BAD_REQUEST).json({ message: "Cannot message yourself" });
     }
 
     const receiver = await User.findById(receiverId);
     if (!receiver) {
-      return res.status(404).json({ message: "Receiver not found" });
+      return res.status(STATUS_CODES.NOT_FOUND).json({ message: "Receiver not found" });
+    }
+    const isBlocked = receiver.blockedUser.some(
+      (id) => id.toString() === senderId.toString()
+    );
+
+    if (isBlocked) {
+      return res.status(STATUS_CODES.FORBIDDEN).json({
+        message: "You cannot send messages to this user",
+      });
     }
 
     // Validation
     if (!text && !file) {
-      return res.status(404).json({ message: "Message cannot be empty" });
+      return res.status(STATUS_CODES.NOT_FOUND).json({ message: "Message cannot be empty" });
     }
 
     // Find or create conversation
@@ -137,7 +160,7 @@ export const sendMessages = async (req, res) => {
         imageUrl = upload.secure_url;
       }
     } catch (err) {
-      return res.status(500).json({ message: "Image upload failed" });
+      return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR ).json({ message: "Image upload failed" });
     }
 
     // Create message
@@ -172,7 +195,7 @@ export const sendMessages = async (req, res) => {
       }
     }
 
-    // Update conversation safely
+    // Update conversation 
     const receiverKey = receiverId.toString();
     const senderKey = senderId.toString();
     if (!conversation.unreadCount) {
@@ -214,12 +237,12 @@ export const sendMessages = async (req, res) => {
       });
     }
 
-    res.status(201).json({
+    res.status(STATUS_CODES.CREATED).json({
       message: "Message sent successfully",
       data: newMessage,
     });
   } catch (error) {
     console.log("sendMessages error:", error.message);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ message: "Internal server error" });
   }
 };

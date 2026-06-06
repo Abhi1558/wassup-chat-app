@@ -15,6 +15,7 @@ const Sidebar = () => {
   } = useChatStore();
   
   const onlineUsers = useChatStore((state) => state.onlineUsers);
+  
   const conversations = useChatStore((state) => state.conversations);
   const formatTime = (timestamp) => {
     if (!timestamp) return "";
