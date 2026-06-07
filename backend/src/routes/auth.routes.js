@@ -9,11 +9,7 @@ import {
 
 import { protectedRoute }from "../middlewares/user.middleware.js";
 
-import {
-  loginLimiter,
-  signupLimiter,
-  forgotPasswordLimiter,
-} from "../middlewares/rateLimiter.js";
+import{ loginLimiter, signupLimiter, forgotPasswordLimiter } from "../middlewares/ratelimiter.js";
 
 const router = express.Router();
 

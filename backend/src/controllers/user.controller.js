@@ -219,9 +219,7 @@ export const updateProfile = async (req, res) => {
     }
     if (fullName) updateData.fullName = fullName;
 
-    if (description !== undefined && description.trim().length === 0) {
-      return res.status(400).json({ message: "Description can't be empty" });
-    }
+    
     if (description !== undefined) {
       updateData.description = description.trim();
     }

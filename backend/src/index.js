@@ -20,6 +20,7 @@ const requiredEnv = [
   "PORT",
   "MONGODB_URI",
   "JWT_SECRET",
+  
 ];
 
 requiredEnv.forEach((key) => {

@@ -61,7 +61,7 @@ const ChangeEmail = () => {
                 setFormData({ ...formData, password: e.target.value })
               }
               className="w-full bg-transparent outline-none text-xl"
-              placeholder="Enter password"
+              placeholder="Enter current password"
             />
           </div>
 

@@ -10,7 +10,7 @@ const userSockets = new Map();
 export const initSocket = (server) => {
   io = new Server(server, {
     cors: {
-      origin: "http://localhost:5173",
+      origin: process.env.CLIENT_URL,
       credentials: true,
     },
   });
