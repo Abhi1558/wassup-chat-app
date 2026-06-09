@@ -45,6 +45,7 @@ const changePassword = () => {
           <input
             type="password"
             className="w-full bg-transparent outline-none text-xl"
+            disabled={passwordChangeloading}
             placeholder="Enter new Password"
             onChange={(e) => setNewPassword(e.target.value)}
           />
@@ -53,6 +54,7 @@ const changePassword = () => {
           <input
             type="password"
             className="w-full bg-transparent outline-none text-xl"
+            disabled={passwordChangeloading}
             placeholder="Confirm new Password"
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
@@ -67,6 +69,7 @@ const changePassword = () => {
         </button>
         <button
           className="text-primary/50 hover:text-primary text-sm"
+          disabled={passwordChangeloading}  
           onClick={() => navigate("/forgot-password")}
         >
           <p>Forget password? click here to reset password</p>

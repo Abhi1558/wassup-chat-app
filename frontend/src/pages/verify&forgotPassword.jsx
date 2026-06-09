@@ -55,6 +55,7 @@ const VerifyAndResetPassword = () => {
             type="password"
             className="input input-bordered w-full"
             placeholder="New Password"
+            disabled={loading}
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
           />
@@ -63,6 +64,7 @@ const VerifyAndResetPassword = () => {
             type="password"
             className="input input-bordered w-full"
             placeholder="Confirm Password"
+            disabled={loading}
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
           />

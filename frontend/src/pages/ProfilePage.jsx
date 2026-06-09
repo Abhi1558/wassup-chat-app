@@ -76,6 +76,7 @@ const Profile = () => {
             {/* Back Button */}
             <button
               onClick={() => navigate(-1)}
+              disabled={isUpdating}
               className="btn btn-ghost gap-2 absolute right-0"
             >
               <ArrowLeft size={20} />
@@ -99,6 +100,7 @@ const Profile = () => {
                 <input
                   type="file"
                   id="avatar-upload"
+                  disabled={isUpdating}
                   className="hidden"
                   onChange={handleProfilePic}
                 />
@@ -120,6 +122,7 @@ const Profile = () => {
                     name="fullName"
                     value={formData.fullName}
                     onChange={handleName}
+                    disabled={isUpdating}
                     className="input pl-10 input-bordered w-full text-lg h-9 "
                   />
                 </div>
@@ -147,6 +150,7 @@ const Profile = () => {
                       <textarea
                         name="description"
                         value={formData.description}
+                        disabled={isUpdating}
                         onChange={(e) =>
                           setFormData((prev) => ({
                             ...prev,

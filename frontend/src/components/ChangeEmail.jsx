@@ -33,7 +33,7 @@ const ChangeEmail = () => {
             <p className="text-sm opacity-70 mt-1">Change your email address</p>
           </div>
 
-          <button onClick={() => navigate(-1)} className="btn btn-ghost gap-2">
+          <button onClick={() => navigate(-1)} disabled={emailChangeloading}  className="btn btn-ghost gap-2">
             <ArrowLeft size={20} />
             Back
           </button>
@@ -45,6 +45,7 @@ const ChangeEmail = () => {
             <input
               type="email"
               value={formData.email}
+              disabled={emailChangeloading} 
               onChange={(e) =>
                 setFormData({ ...formData, email: e.target.value })
               }
@@ -57,6 +58,7 @@ const ChangeEmail = () => {
             <input
               type="password"
               value={formData.password}
+              disabled={emailChangeloading}
               onChange={(e) =>
                 setFormData({ ...formData, password: e.target.value })
               }

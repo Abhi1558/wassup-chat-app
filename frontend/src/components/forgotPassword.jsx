@@ -27,6 +27,7 @@ const forgotPassword = () => {
             <button
               onClick={() => navigate(-1)}
               className="btn btn-ghost gap-2"
+              disabled={passwordChangeloading}
             >
               <ArrowLeft size={20} />
               Back
@@ -41,6 +42,7 @@ const forgotPassword = () => {
             type="text"
             className="w-full bg-transparent outline-none text-xl"
             placeholder="Enter your email"
+            disabled={passwordChangeloading}
             onChange={(e) => setEmail(e.target.value)}
           />
         </div>

@@ -1,12 +1,28 @@
 {
   "dependencies": {
-    "axios": "^1.13.6",
-    "crypto": "^1.0.1",
-    "nodemailer": "^8.0.2",
-    "react-easy-crop": "^5.5.7",
-    "zustand": "^5.0.12"
+    "crypto": "^1.0.1"
   },
   "devDependencies": {
     "prettier": "^3.8.3"
-  }
+  },
+  "name": "wassup!",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm install --prefix backend && npm install --prefix frontend && npm run build --prefix frontend",
+    "start": "npm run start --prefix backend"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Abhi1558/wassup-chat-app.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Abhi1558/wassup-chat-app/issues"
+  },
+  "homepage": "https://github.com/Abhi1558/wassup-chat-app#readme"
 }

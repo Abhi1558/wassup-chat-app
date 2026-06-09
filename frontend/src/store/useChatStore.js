@@ -10,9 +10,13 @@ export const useChatStore = create((set, get) => ({
   isConversationsLoading: false,
   conversations: [],
   messages: [],
+  
 
   isMessagesLoading: false,
   onlineUsers: [],
+  isSidebarOpen: false,
+  setSidebarOpen: (value) =>
+  set({ isSidebarOpen: value }),
 
   searchUsers: async (query) => {
     try {
