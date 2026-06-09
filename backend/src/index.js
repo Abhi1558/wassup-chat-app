@@ -17,12 +17,7 @@ import messageRoutes from "./routes/message.route.js";
 dotenv.config();
 
 // Environment Validation
-const requiredEnv = [
-  "PORT",
-  "MONGODB_URI",
-  "JWT_SECRET",
-  
-];
+const requiredEnv = ["PORT", "MONGODB_URI", "JWT_SECRET"];
 
 requiredEnv.forEach((key) => {
   if (!process.env[key]) {
@@ -56,13 +51,13 @@ app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/verification", verificationRoutes);
 app.use("/api/message", messageRoutes);
-if(process.env.NODE_ENV === "production"){
+if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
-  app.get("*", (req, res) => {
+  app.get("/*splat", (req, res) => {
     res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
   });
-};
+}
 
 // Socket Initialization
 initSocket(server);
