@@ -57,7 +57,7 @@ const ChatHeader = () => {
           <button className="avatar"
           onClick={()=>navigate("/user-profile")}>
             <div className="size-10 rounded-full">
-              <img src={SelectedUser?.profilePic || "../avatar.jpg"} alt="" />
+              <img src={SelectedUser?.profilePic || "/avatar.jpg"} alt="" />
             </div>
           </button>
 

@@ -149,7 +149,7 @@ const Sidebar = () => {
                   `}
                 >
                   <img
-                    src={user?.profilePic || avatar}
+                    src={user?.profilePic || "/avatar.jpg"}
                     alt={user?.fullName}
                     className={`
                       avatar

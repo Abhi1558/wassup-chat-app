@@ -65,7 +65,7 @@ function SearchUser() {
                 className="flex items-center gap-3 p-3 hover:bg-base-200 cursor-pointer"
               >
                 <img
-                  src={user.profilePic || avatar}
+                  src={user.profilePic || "/avatar.jpg"}
                   alt=""
                   className="w-8 h-8 rounded-full"
                 />

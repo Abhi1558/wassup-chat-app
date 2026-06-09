@@ -66,7 +66,7 @@ const SelectedUserProfile = ({ user }) => {
             {/* Profile Picture */}
             <div className="absolute left-1/2 -bottom-14 -translate-x-1/2">
               <img
-                src={SelectedUser.profilePic || "./avatar.jpg"}
+                src={SelectedUser.profilePic || "/avatar.jpg"}
                 alt={SelectedUser.fullName}
                 className="w-28 h-28 rounded-full object-cover border-4 border-base-200"
               />
