@@ -14,10 +14,15 @@ import userRoutes from "./routes/user.routes.js";
 import verificationRoutes from "./routes/verification.routes.js";
 import messageRoutes from "./routes/message.route.js";
 
+
 dotenv.config();
 
 // Environment Validation
-const requiredEnv = ["PORT", "MONGODB_URI", "JWT_SECRET"];
+const requiredEnv = [
+  "MONGODB_URI",
+  "JWT_SECRET",
+  
+];
 
 requiredEnv.forEach((key) => {
   if (!process.env[key]) {
@@ -31,7 +36,16 @@ const PORT = process.env.PORT || 5000;
 const __dirname = path.resolve();
 
 // Security Middleware
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        imgSrc: ["'self'", "data:", "blob:"],
+      },
+    },
+  })
+);
 
 app.use(
   cors({
@@ -51,12 +65,13 @@ app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/verification", verificationRoutes);
 app.use("/api/message", messageRoutes);
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
-  app.get("/*splat", (req, res) => {
-    res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
-  });
+
+if(process.env.NODE_ENV=== "PRODUCTION"){
+  app.use(express.static(path.join(__dirname,"../frontend/dist")));
+  app.get("*",(req,res)=>{
+    res.sendFile(path.join(__dirname,"../frontend","dist","index.html"))
+  })
 }
 
 // Socket Initialization
