@@ -39,7 +39,7 @@ export const getChats = async (req, res) => {
       participants: userId,
     })
       .sort({ lastMessageTime: -1 })
-      .populate("participants", "fullName profilePic lastSeen _id description");
+      .populate("participants", "fullName profilePic lastSeen _id description email ");
      // Format conversation data for sidebar
     const chats = conversations.map((conv) => {
       const otherUser = conv.participants.find(

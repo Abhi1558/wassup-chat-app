@@ -2,9 +2,10 @@ import { X } from "lucide-react";
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
 import { useSettingStore } from "../store/useSetting";
-import avatar from "../../public/avatar.jpg";
+import { useNavigate } from "react-router-dom";
 
 const ChatHeader = () => {
+  const navigate =useNavigate()
   const { SelectedUser, setSelectedUser, onlineUsers } = useChatStore();
   const { authUser } = useAuthStore();
   const { toggleBlockUser, isBlockingUser } = useSettingStore();
@@ -53,11 +54,12 @@ const ChatHeader = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           {/* avatar */}
-          <div className="avatar">
+          <button className="avatar"
+          onClick={()=>navigate("/user-profile")}>
             <div className="size-10 rounded-full">
-              <img src={SelectedUser?.profilePic || avatar} alt="" />
+              <img src={SelectedUser?.profilePic || "../avatar.jpg"} alt="" />
             </div>
-          </div>
+          </button>
 
           {/* info */}
           <div>

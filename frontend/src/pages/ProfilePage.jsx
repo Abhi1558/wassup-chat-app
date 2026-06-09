@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Camera, User, Info, ArrowLeft } from "lucide-react";
 import useAuthStore from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
-import avatar from "/avatar.jpg";
+
 
 const Profile = () => {
   const { isCheckingAuth,authUser, isUpdating, updateProfile } = useAuthStore();
@@ -87,7 +87,7 @@ const Profile = () => {
           <div className="flex flex-col items-center gap-2">
             <div className="relative">
               <img
-                src={previewPic || authUser?.profilePic || avatar}
+                src={previewPic || authUser?.profilePic || "../avatar.jpg"}
                 alt="profilePic"
                 className="size-32 rounded-full p-1 object-cover border-4 border-primary/20"
               />

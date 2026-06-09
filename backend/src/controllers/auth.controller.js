@@ -17,6 +17,11 @@ export const signUp = async (req, res) => {
     }
 
     const cleanName = fullName.trim();
+    if (cleanName.length < 3 || cleanName.length > 30) {
+      return res.status(STATUS_CODES.BAD_REQUEST).json({
+        message: "Full name must be 3-30 characters long",
+      });
+    }
     const cleanEmail = email.trim().toLowerCase();
 
     if (!/^\S+@\S+\.\S+$/.test(cleanEmail)) {

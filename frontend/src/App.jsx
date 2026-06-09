@@ -20,9 +20,10 @@ import ChangePassword from "./components/ChangePassword";
 import ForgotPassword from "./components/forgotPassword";
 import DeleteAccount from "./components/deleteAccount";
 import { useThemeStore } from "./store/useThemeStore";
+import SelectedUserProfile from "./components/SelectedUserProfile";
 const App = () => {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
-  const {theme}=useThemeStore()
+  const { theme } = useThemeStore();
 
   useEffect(() => {
     checkAuth();
@@ -61,7 +62,7 @@ const App = () => {
         />
         <Route
           path="/settings"
-          element={authUser ? <Setting/> : <Navigate to="/Login" />}
+          element={authUser ? <Setting /> : <Navigate to="/Login" />}
         >
           <Route index element={<Navigate to="change-email" />} />
 
@@ -85,6 +86,10 @@ const App = () => {
           path="api/verification/password-verification/:token"
           element={<VerifyAndResetPassword />}
         />
+      <Route
+        path="/user-profile"
+        element={authUser ? <SelectedUserProfile /> : <Navigate to="/login" />}
+      />
       </Routes>
       <Toaster />
     </div>

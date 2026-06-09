@@ -144,7 +144,7 @@ const Sidebar = () => {
                 {/* AVATAR */}
                 <div
                   className={`
-                    w-20 relative
+                    w-20 relative m-2
                     ${isSidebarOpen ? "" : "mx-auto  lg:mx-0"}
                   `}
                 >
@@ -152,10 +152,8 @@ const Sidebar = () => {
                     src={user?.profilePic || avatar}
                     alt={user?.fullName}
                     className={`
-                      size-14
-                      rounded-full
-                      object-cover
-                      p-[2px]
+                      avatar
+                      size-12 rounded-full
                       ${
                         SelectedUser?._id === user?._id
                           ? "border-primary/40 border-[3px]"

@@ -217,11 +217,28 @@ export const updateProfile = async (req, res) => {
     if (fullName !== undefined && fullName.trim().length === 0) {
       return res.status(400).json({ message: "Full name can't be empty" });
     }
-    if (fullName) updateData.fullName = fullName;
+    if (fullName) {
+      const cleanName = fullName.trim();
 
-    
+      if (cleanName.length < 3 || cleanName.length > 30) {
+        return res.status(400).json({
+          message: "Full name must be between 3 and 30 characters",
+        });
+      }
+
+      updateData.fullName = cleanName;
+    }
+
     if (description !== undefined) {
-      updateData.description = description.trim();
+      const cleanDescription = description.trim();
+
+      if (cleanDescription.length > 200) {
+        return res.status(400).json({
+          message: "Description cannot exceed 200 characters",
+        });
+      }
+
+      updateData.description = cleanDescription;
     }
     if (req.file && !req.file.mimetype.startsWith("image/")) {
       return res.status(400).json({
