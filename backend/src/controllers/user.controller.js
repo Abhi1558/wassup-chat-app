@@ -245,29 +245,8 @@ export const updateProfile = async (req, res) => {
         message: "Only image files allowed",
       });
     }
-    if (req.file) {
-      let uploadImage;
-      try {
-        uploadImage = await new Promise((resolve, reject) => {
-          const stream = cloudinary.uploader.upload_stream(
-            { folder: "profiles" },
-            (error, result) => {
-              if (error) return reject(error);
-              resolve(result);
-            }
-          );
-
-          stream.end(req.file.buffer);
-        });
-      } catch (err) {
-        return res.status(500).json({
-          success: false,
-          message: "Image upload failed",
-        });
-      }
-
-      updateData.profilePic = uploadImage.secure_url;
-    }
+    const uploadImage = await streamUpload(req.file);
+    updateData.profilePic = uploadImage.secure_url;
 
     if (Object.keys(updateData).length === 0) {
       return res.status(400).json({ message: "No data provided to update" });
