@@ -27,8 +27,6 @@ const SocketManager = () => {
 
     // online users
     socket.on("getOnlineUsers", (users) => {
-      
-
       setOnlineUsers(users);
     });
 

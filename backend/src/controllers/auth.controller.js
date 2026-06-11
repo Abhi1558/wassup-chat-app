@@ -7,7 +7,7 @@ import { STATUS_CODES } from "../lib/constants.js";
 
 export const signUp = async (req, res) => {
   const { fullName, email, password } = req.body;
-
+  console.log("Signup started");
   try {
     // Validate user input
     if (!fullName || !email || !password) {
@@ -51,7 +51,7 @@ export const signUp = async (req, res) => {
     const token = crypto.randomBytes(32).toString("hex");
 
     const verifyLink = `${process.env.CLIENT_URL}/verification/signUp-verification/${token}`;
-
+    
     // Store temporary user data and send verification email
     const tempUser = await Temp.findOneAndUpdate(
       { email: cleanEmail, purpose: "signup" },
@@ -65,7 +65,7 @@ export const signUp = async (req, res) => {
       },
       { upsert: true, new: true }
     );
-
+    console.log("email send ")
     await sendEmail(
       cleanEmail,
       "Verify your email",

@@ -33,32 +33,38 @@ export const generateToken = (userId, res) => {
 
 
 
+export const sendEmail = async (to, subject, html) => {
+  try {
+    console.log("EMAIL_USER:", process.env.EMAIL_USER);
+    console.log("EMAIL_PASS EXISTS:", !!process.env.EMAIL_PASS);
 
-export const sendEmail = async (to, subject,html) => {
-    try{
-        const transport = nodemailer.createTransport({
-            service : "gmail",
-            auth : {
-                user : process.env.EMAIL_USER,
-                pass : process.env.EMAIL_PASS
-            }
-        }) 
-        const mailOptions = {
-            from : process.env.EMAIL_USER,
-            to, 
-            subject,
-            html
+    const transport = nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+      family: 4, // Force IPv4
+    });
 
-        }
-        const info = await transport.sendMail(mailOptions)
+    await transport.verify();
+    console.log("SMTP Ready");
 
-        console.log("email send successfully")
+    const info = await transport.sendMail({
+      from: process.env.EMAIL_USER,
+      to,
+      subject,
+      html,
+    });
 
-    }catch(error){
-        console.error("Email sending failed:", error.message);
-
-    }
-}
+    console.log("Email sent:", info.messageId);
+  } catch (error) {
+    console.error("FULL EMAIL ERROR:", error);
+    throw error;
+  }
+};
 
 export const streamUpload = (file) => {
   return new Promise((resolve, reject) => {

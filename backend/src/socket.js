@@ -16,11 +16,11 @@ export const initSocket = (server) => {
   });
 
   io.on("connection", (socket) => {
-    console.log("✅ Connected:", socket.id);
+    
 
     // REGISTER USER
     socket.on("addUser", (userId) => {
-      console.log("🟢 addUser:", userId);
+      
 
       socket.userId = userId;
 
@@ -30,12 +30,12 @@ export const initSocket = (server) => {
       // send all online users
       io.emit("getOnlineUsers", Array.from(userSockets.keys()));
 
-      console.log("ONLINE:", Array.from(userSockets.keys()));
+      
     });
 
     // DISCONNECT
     socket.on("disconnect", async () => {
-      console.log("❌ Disconnected:", socket.id);
+      
 
       if (socket.userId) {
         // remove from online users
@@ -51,7 +51,7 @@ export const initSocket = (server) => {
       }
     });
     socket.on("markSeen", async ({ senderId, receiverId }) => {
-      console.log("👁️ markSeen", senderId, receiverId);
+      
 
       // get unseen messages first
       const unseenMessages = await Message.find({

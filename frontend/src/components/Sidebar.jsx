@@ -19,8 +19,11 @@ const Sidebar = () => {
   const conversations = useChatStore((state) => state.conversations);
 
   useEffect(() => {
-    getConversations();
+    getConversations(true);
   }, [getConversations]);
+  useEffect(() => {
+    getConversations(false);
+  }, [onlineUsers]);
 
   const formatTime = (timestamp) => {
     if (!timestamp) return "";

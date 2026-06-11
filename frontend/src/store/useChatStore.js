@@ -10,13 +10,11 @@ export const useChatStore = create((set, get) => ({
   isConversationsLoading: false,
   conversations: [],
   messages: [],
-  
 
   isMessagesLoading: false,
   onlineUsers: [],
   isSidebarOpen: false,
-  setSidebarOpen: (value) =>
-  set({ isSidebarOpen: value }),
+  setSidebarOpen: (value) => set({ isSidebarOpen: value }),
 
   searchUsers: async (query) => {
     try {
@@ -32,15 +30,20 @@ export const useChatStore = create((set, get) => ({
   },
   clearUsers: () => set({ searchedUsers: [] }),
 
-  getConversations: async () => {
-    set({ isConversationsLoading: true });
+  getConversations: async (showLoader = true) => {
+    if (showLoader) {
+      set({ isConversationsLoading: true });
+    }
+
     try {
       const res = await axiosInstance.get("/message/get-chats");
       set({ conversations: res.data });
     } catch (error) {
       toast.error(error.response.data.message);
     } finally {
-      set({ isConversationsLoading: false });
+      if (showLoader) {
+        set({ isConversationsLoading: false });
+      }
     }
   },
   setSelectedUser: (user) => set({ SelectedUser: user }),
@@ -53,15 +56,12 @@ export const useChatStore = create((set, get) => ({
 
       const res = await axiosInstance.post(
         `/message/send-message/${SelectedUser._id}`,
-        data,
+        data
       );
 
       set((state) => ({
         messages: [...state.messages, res.data.data],
       }));
-      
-
-   
     } catch (error) {
       console.log(error.response.data.message);
       toast.error("Message not sent");
@@ -76,7 +76,7 @@ export const useChatStore = create((set, get) => ({
       set({ isMessagesLoading: true });
 
       const res = await axiosInstance.get(
-        `/message/get-message/${SelectedUser._id}`,
+        `/message/get-message/${SelectedUser._id}`
       );
 
       set({ messages: res.data });
@@ -94,40 +94,40 @@ export const useChatStore = create((set, get) => ({
       messages: [...state.messages, message],
     })),
   updateConversation: (data) =>
-  set((state) => {
-    const updated = state.conversations.map((chat) => {
-      if (chat.conversationId === data.conversationId) {
-        return {
-          ...chat,
-          lastMessage: data.lastMessage,
-          lastMessageTime: data.lastMessageTime,
-          unreadCount:
-            data.unreadCount !== undefined
-              ? data.unreadCount
-              : chat.unreadCount,
-        };
-      }
-      return chat;
-    });
+    set((state) => {
+      const updated = state.conversations.map((chat) => {
+        if (chat.conversationId === data.conversationId) {
+          return {
+            ...chat,
+            lastMessage: data.lastMessage,
+            lastMessageTime: data.lastMessageTime,
+            unreadCount:
+              data.unreadCount !== undefined
+                ? data.unreadCount
+                : chat.unreadCount,
+          };
+        }
+        return chat;
+      });
 
-    updated.sort(
-      (a, b) => new Date(b.lastMessageTime) - new Date(a.lastMessageTime)
-    );
+      updated.sort(
+        (a, b) => new Date(b.lastMessageTime) - new Date(a.lastMessageTime)
+      );
 
-    return { conversations: updated };
-  }),
+      return { conversations: updated };
+    }),
   updateMessageStatus: (messageId, status) =>
     set((state) => ({
       messages: state.messages.map((msg) =>
-        msg._id === messageId ? { ...msg, status } : msg,
+        msg._id === messageId ? { ...msg, status } : msg
       ),
     })),
   markMessagesSeen: (senderId) =>
-  set((state) => ({
-    messages: state.messages.map((msg) =>
-      String(msg.senderId) === String(senderId)
-        ? { ...msg, status: "seen" }
-        : msg
-    ),
-  })),
+    set((state) => ({
+      messages: state.messages.map((msg) =>
+        String(msg.senderId) === String(senderId)
+          ? { ...msg, status: "seen" }
+          : msg
+      ),
+    })),
 }));

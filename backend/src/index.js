@@ -37,7 +37,7 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        imgSrc: ["'self'", "data:", "blob:"],
+        imgSrc: ["'self'", "data:", "blob:", "https://res.cloudinary.com"],
       },
     },
   })
@@ -78,7 +78,7 @@ initSocket(server);
 connectDB()
   .then(() => {
     server.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
+      ;
     });
   })
   .catch((error) => {
