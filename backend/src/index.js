@@ -14,14 +14,10 @@ import userRoutes from "./routes/user.routes.js";
 import verificationRoutes from "./routes/verification.routes.js";
 import messageRoutes from "./routes/message.route.js";
 
-
 dotenv.config();
 
 // Environment Validation
-const requiredEnv = [
-  "MONGODB_URI",
-  "JWT_SECRET",
-];
+const requiredEnv = ["MONGODB_URI", "JWT_SECRET"];
 
 requiredEnv.forEach((key) => {
   if (!process.env[key]) {
@@ -66,18 +62,13 @@ app.use("/api/user", userRoutes);
 app.use("/api/verification", verificationRoutes);
 app.use("/api/message", messageRoutes);
 
-
-
-
-
 // Production frontend
 if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "frontend/dist")));
+  app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "frontend/dist/index.html"));
+  app.get(/.*/, (req, res) => {
+    res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
   });
-
 }
 
 // Socket Initialization
