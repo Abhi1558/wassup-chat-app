@@ -228,7 +228,7 @@ export const updateProfile = async (req, res) => {
 
       updateData.fullName = cleanName;
     }
-
+    
     if (description !== undefined) {
       const cleanDescription = description.trim();
 
@@ -241,6 +241,8 @@ export const updateProfile = async (req, res) => {
       updateData.description = cleanDescription;
     }
     if (req.file && !req.file.mimetype.startsWith("image/")) {
+      console.log(req.file)
+
       return res.status(400).json({
         message: "Only image files allowed",
       });
