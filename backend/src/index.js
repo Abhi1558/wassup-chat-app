@@ -21,7 +21,6 @@ dotenv.config();
 const requiredEnv = [
   "MONGODB_URI",
   "JWT_SECRET",
-  
 ];
 
 requiredEnv.forEach((key) => {
@@ -32,6 +31,7 @@ requiredEnv.forEach((key) => {
 
 const app = express();
 const server = http.createServer(app);
+
 const PORT = process.env.PORT || 5000;
 const __dirname = path.resolve();
 
@@ -67,11 +67,17 @@ app.use("/api/verification", verificationRoutes);
 app.use("/api/message", messageRoutes);
 
 
-if(process.env.NODE_ENV=== "PRODUCTION"){
-  app.use(express.static(path.join(__dirname,"../frontend/dist")));
-  app.get("*",(req,res)=>{
-    res.sendFile(path.join(__dirname,"../frontend","dist","index.html"))
-  })
+
+
+
+// Production frontend
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "frontend/dist")));
+
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "frontend/dist/index.html"));
+  });
+
 }
 
 // Socket Initialization
