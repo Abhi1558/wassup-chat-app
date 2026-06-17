@@ -45,14 +45,21 @@ const ChatMessages = () => {
 
   // 👁️ Mark seen
   useEffect(() => {
-    if (!SelectedUser?._id || !authUser?._id)
-      return;
+  if (!SelectedUser?._id || !authUser?._id) return;
 
-    socket.emit("markSeen", {
-      senderId: SelectedUser._id,
-      receiverId: authUser._id,
-    });
-  }, [SelectedUser?._id, authUser?._id],messages);
+  const hasUnread = messages.some(
+    (msg) =>
+      String(msg.senderId) === String(SelectedUser._id) &&
+      msg.status !== "seen"
+  );
+
+  if (!hasUnread) return;
+
+  socket.emit("markSeen", {
+    senderId: SelectedUser._id,
+    receiverId: authUser._id,
+  });
+}, [messages, SelectedUser?._id, authUser?._id]);
   // Group messages by date
   const groupedMessages = messages.reduce((groups, message) => {
     const date = new Date(message.createdAt).toLocaleDateString([], {

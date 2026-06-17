@@ -108,6 +108,14 @@ const Login = () => {
           </p>
 
         </div>
+        <div className="mt-3 text-center">
+          <p className="text-base-content/60">
+            
+            <Link to="/forgot-password" className="link link-primary">Forgot password?</Link>  
+          </p>
+
+        </div>
+
 
       </div>
       

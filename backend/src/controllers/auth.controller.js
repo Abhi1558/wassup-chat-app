@@ -207,7 +207,7 @@ export const forgotPassword = async (req, res) => {
         { upsert: true, new: true }
       );
 
-      const verifylink = `${process.env.CLIENT_URL}/password-verification/${token}`;
+      const verifyLink = `${process.env.CLIENT_URL}/verification/password-verification/${token}`;
 
       // Send password reset email
       await sendEmail(
@@ -215,10 +215,14 @@ export const forgotPassword = async (req, res) => {
         "Reset password link",
         `
         <p>this is your link for changing password.it will be expired in 5 minutes.</p>
+        <a href="${verifyLink}" 
+           style="padding:10px 20px; background:#4CAF50; color:white; text-decoration:none;">
+           Verify Email
+        </a>
 
         <p>If button doesn't work, use this link:</p>
 
-        <p>${verifylink}</p>
+        <p>${verifyLink}</p>
       `
       );
     }

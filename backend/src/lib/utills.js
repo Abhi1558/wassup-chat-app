@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken"
-import nodemailer from "nodemailer"
+import axios from "axios";
 import streamifier from "streamifier";
 import cloudinary from "./cloudinary.js";
 
@@ -35,37 +35,39 @@ export const generateToken = (userId, res) => {
 
 export const sendEmail = async (to, subject, html) => {
   try {
-    console.log("EMAIL_USER:", process.env.EMAIL_USER);
-    console.log("EMAIL_PASS EXISTS:", !!process.env.EMAIL_PASS);
-
-    const transport = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 587,
-      secure: false,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+    
+    const response = await axios.post(
+      "https://api.brevo.com/v3/smtp/email",
+      {
+        sender: {
+          name: "Wassup Chat",
+          email: process.env.EMAIL_USER,
+        },
+        to: [
+          {
+            email: to,
+          },
+        ],
+        subject,
+        htmlContent: html,
       },
-      family: 4, // Force IPv4
-    });
+      {
+        headers: {
+          accept: "application/json",
+          "api-key": process.env.BREVO_API_KEY,
+          "content-type": "application/json",
+        },
+      }
+    );
 
-    await transport.verify();
-    console.log("SMTP Ready");
-
-    const info = await transport.sendMail({
-      from: process.env.EMAIL_USER,
-      to,
-      subject,
-      html,
-    });
-
-    console.log("Email sent:", info.messageId);
+    
   } catch (error) {
-    console.error("FULL EMAIL ERROR:", error);
-    throw error;
+    console.error(
+      "Brevo API Error:",
+      error.response?.data || error.message
+    );
   }
 };
-
 export const streamUpload = (file) => {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(

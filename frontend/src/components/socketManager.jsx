@@ -6,7 +6,7 @@ import { useChatStore } from "../store/useChatStore";
 const SocketManager = () => {
   const { authUser } = useAuthStore();
 
-  console.log("SocketManager rendered");
+  
 
   const setOnlineUsers = useChatStore((state) => state.setOnlineUsers);
 

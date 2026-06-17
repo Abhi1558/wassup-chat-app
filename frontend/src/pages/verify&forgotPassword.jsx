@@ -4,7 +4,7 @@ import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
 import { Loader2 } from "lucide-react";
 
-const VerifyAndResetPassword = () => {
+const VerifyAndForgotPassword = () => {
   const { token } = useParams();
   const navigate = useNavigate();
 
@@ -89,4 +89,4 @@ const VerifyAndResetPassword = () => {
   );
 };
 
-export default VerifyAndResetPassword;
+export default VerifyAndForgotPassword;

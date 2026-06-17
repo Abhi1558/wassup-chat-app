@@ -143,6 +143,10 @@ export const changeEmail = async (req, res) => {
       `
         <p>You requested to change your email.</p>
         <p>This link will expire in 5 minutes.</p>
+        <a href="${verificationLink}" 
+           style="padding:10px 20px; background:#4CAF50; color:white; text-decoration:none;">
+           Verify Email
+        </a>
         <p>If the button doesn't work, use this link:</p>
         <p>${verificationLink}</p>
       `

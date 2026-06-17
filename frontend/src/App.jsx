@@ -12,7 +12,7 @@ import Profile from "./pages/ProfilePage";
 import Setting from "./pages/settingPage";
 import VerifySignupPage from "./pages/verifysignup";
 import VerifyNewEmail from "./pages/verifyNewEmail";
-import VerifyAndResetPassword from "./pages/verify&forgotPassword";
+import VerifyAndForgotPassword from "./pages/verify&forgotPassword";
 import SocketManager from "./components/socketManager";
 import ChangeEmail from "./components/ChangeEmail";
 import PrivacySetting from "./components/PrivacySetting";
@@ -72,7 +72,7 @@ const App = () => {
           <Route path="change-password" element={<ChangePassword />} />
           <Route path="delete-account" element={<DeleteAccount />} />
         </Route>
-        <Route path="forgot-password" element={<ForgotPassword />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
 
         <Route
           path="/verification/signUp-verification/:token"
@@ -83,8 +83,8 @@ const App = () => {
           element={<VerifyNewEmail />}
         />
         <Route
-          path="api/verification/password-verification/:token"
-          element={<VerifyAndResetPassword />}
+          path="/verification/password-verification/:token"
+          element={<VerifyAndForgotPassword />}
         />
       <Route
         path="/user-profile"
